@@ -23,7 +23,7 @@ def get_args():
     parser = argparse.ArgumentParser(description='Fast portrait matting !')
     parser.add_argument('--dataDir', default='./DATA/', help='dataset directory')
     parser.add_argument('--saveDir', default='./ckpt', help='model save dir')
-    parser.add_argument('--trainData', default='human_matting', help='train dataset name')
+    parser.add_argument('--trainData', default='human_matting_data', help='train dataset name')
     parser.add_argument('--trainList', default='./data/list.txt', help='train img ID')
     parser.add_argument('--load', default= 'human_matting', help='save model')
 
@@ -152,7 +152,7 @@ def loss_function(args, img, trimap_pre, trimap_gt, alpha_pre, alpha_gt):
         loss = cross_entropy_loss
     if args.train_train_phase == 'end_to_end':
         loss = 0.5*L_alpha + 0.5*L_composition + 0.01*cross_entropy_loss
-        
+
     return loss, L_alpha, L_composition, cross_entropy_loss
 
 
@@ -178,9 +178,9 @@ def main():
     model.to(device)
 
     print("============> Loading datasets ...")
-    train_data = getattr(dataset, args.trainData)(base_dir = args.dataDir, \
+    train_data = getattr(dataset, args.trainData)(root_dir = args.dataDir, \
                                                   imglist = args.trainList, \
-                                                  patch = args.patch_size)
+                                                  patch_size = args.patch_size)
     trainloader = DataLoader(train_data, 
                              batch_size=args.train_batch, 
                              drop_last=True, 

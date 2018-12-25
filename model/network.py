@@ -8,11 +8,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.M_Net import M_Net
+from model.M_Net import M_net
 from model.T_Net import T_mv2_unet
 
 
-M_net = M_Net
 T_net = T_mv2_unet
 
 
@@ -33,8 +32,8 @@ class net(nn.Module):
     def forward(self, input):
 
     	# trimap
-    	trimap = self.t_net(input)
-    	trimap_softmax = F.softmax(trimap)
+        trimap = self.t_net(input)
+        trimap_softmax = F.softmax(trimap)
 
         # paper: bs, fs, us
         bg, fg, unsure = torch.split(trimap_softmax, 1, dim=1)
@@ -47,7 +46,7 @@ class net(nn.Module):
 
         # fusion module
         # paper : alpha_p = fs + us * alpha_r
-    	alpha_p = fg + unsure * alpha_r
+        alpha_p = fg + unsure * alpha_r
 
         return fg, alpha_p
 
