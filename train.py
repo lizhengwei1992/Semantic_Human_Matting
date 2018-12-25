@@ -178,7 +178,7 @@ def main():
     model.to(device)
 
     print("============> Loading datasets ...")
-    train_data = getattr(data, args.trainData)(base_dir = args.dataDir, \
+    train_data = getattr(dataset, args.trainData)(base_dir = args.dataDir, \
                                                   imglist = args.trainList, \
                                                   patch = args.patch_size)
     trainloader = DataLoader(train_data, 
