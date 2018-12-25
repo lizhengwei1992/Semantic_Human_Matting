@@ -216,7 +216,7 @@ def main():
             img, trimap_gt, alpha_gt = sample_batched['image'], sample_batched['trimap'], sample_batched['alpha']
             img, trimap_gt, alpha_gt = img.to(device), trimap_gt.to(device), alpha_gt.to(device)
 
-            mask, alpha = model(img)
+            trimap_pre, alpha_pre = model(img)
             loss, L_alpha, L_composition, L_cross = loss_function(args, 
                                                                   img,
                                                                   trimap_pre, 
