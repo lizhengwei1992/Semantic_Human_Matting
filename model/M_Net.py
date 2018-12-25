@@ -24,25 +24,25 @@ class M_net(nn.Module):
         self.en_conv_bn_relu_1 = nn.Sequential(nn.Conv2d(6, 16, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(16),
                                        nn.ReLU())
-        self.max_pooling_1 = nn.MaxPool2d(kernel_size=3, stride=2) 
+        self.max_pooling_1 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) 
 
         # 1/4
         self.en_conv_bn_relu_2 = nn.Sequential(nn.Conv2d(16, 32, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(32),
                                        nn.ReLU())
-        self.max_pooling_2 = nn.MaxPool2d(kernel_size=3, stride=2) 
+        self.max_pooling_2 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) 
 
         # 1/8
         self.en_conv_bn_relu_3 = nn.Sequential(nn.Conv2d(32, 64, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(64),
                                        nn.ReLU())
-        self.max_pooling_3 = nn.MaxPool2d(kernel_size=3, stride=2) 
+        self.max_pooling_3 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) 
 
         # 1/16
         self.en_conv_bn_relu_4 = nn.Sequential(nn.Conv2d(64, 128, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(128),
                                        nn.ReLU())
-        self.max_pooling_4 = nn.MaxPool2d(kernel_size=3, stride=2) 
+        self.max_pooling_4 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) 
 
         self.en_conv_bn_relu_5 = nn.Sequential(nn.Conv2d(128, 128, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(128),
@@ -54,25 +54,25 @@ class M_net(nn.Module):
         self.de_conv_bn_relu_1 = nn.Sequential(nn.Conv2d(128, 128, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(128),
                                        nn.ReLU())
-        self.deconv_1 = nn.ConvTranspose2d(128, 128, 5, 2, 2, bias=False)
+        self.deconv_1 = nn.ConvTranspose2d(128, 128, 5, 2, 2, 1, bias=False)
 
         # 1/4
         self.de_conv_bn_relu_2 = nn.Sequential(nn.Conv2d(128, 64, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(64),
                                        nn.ReLU())
-        self.deconv_2 = nn.ConvTranspose2d(64, 64, 5, 2, 2, bias=False)
+        self.deconv_2 = nn.ConvTranspose2d(64, 64, 5, 2, 2, 1, bias=False)
 
         # 1/2
         self.de_conv_bn_relu_3 = nn.Sequential(nn.Conv2d(64, 32, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(32),
                                        nn.ReLU())
-        self.deconv_3 = nn.ConvTranspose2d(32, 32, 5, 2, 2, bias=False)
+        self.deconv_3 = nn.ConvTranspose2d(32, 32, 5, 2, 2, 1, bias=False)
 
         # 1/1
         self.de_conv_bn_relu_4 = nn.Sequential(nn.Conv2d(32, 16, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(16),
                                        nn.ReLU())
-        self.deconv_4 = nn.ConvTranspose2d(16, 16, 5, 2, 2, bias=False)
+        self.deconv_4 = nn.ConvTranspose2d(16, 16, 5, 2, 2, 1, bias=False)
 
 
         self.conv = nn.Conv2d(16, 1, 5, 1, 2, bias=False)

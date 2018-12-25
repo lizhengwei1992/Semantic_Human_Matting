@@ -65,6 +65,7 @@ def random_flip(image, trimap, alpha):
         image = cv2.flip(image, 1)
         trimap = cv2.flip(trimap, 1)
         alpha = cv2.flip(alpha, 1)
+    return image, trimap, alpha
 
        
 def np2Tensor(array):
@@ -113,7 +114,7 @@ class human_matting_data(data.Dataset):
         trimap = trimap[0,:,:].unsqueeze_(0)
         alpha = alpha[0,:,:].unsqueeze_(0)
 
-        sample = {'image': image, 'trimap': trimap, 'alpha': _alpha}
+        sample = {'image': image, 'trimap': trimap, 'alpha': alpha}
 
         return sample
 

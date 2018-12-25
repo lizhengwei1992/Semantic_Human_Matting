@@ -150,7 +150,7 @@ def loss_function(args, img, trimap_pre, trimap_gt, alpha_pre, alpha_gt):
     # train_phase
     if args.train_phase == 'pre_train_t_net':
         loss = cross_entropy_loss
-    if args.train_train_phase == 'end_to_end':
+    if args.train_phase == 'end_to_end':
         loss = 0.5*L_alpha + 0.5*L_composition + 0.01*cross_entropy_loss
 
     return loss, L_alpha, L_composition, cross_entropy_loss

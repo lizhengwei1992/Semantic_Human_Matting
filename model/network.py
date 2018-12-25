@@ -33,7 +33,7 @@ class net(nn.Module):
 
     	# trimap
         trimap = self.t_net(input)
-        trimap_softmax = F.softmax(trimap)
+        trimap_softmax = F.softmax(trimap, dim=1)
 
         # paper: bs, fs, us
         bg, fg, unsure = torch.split(trimap_softmax, 1, dim=1)

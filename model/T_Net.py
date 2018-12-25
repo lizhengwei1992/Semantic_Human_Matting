@@ -144,8 +144,7 @@ class T_mv2_unet(nn.Module):
         self.s1_fusion = nn.Sequential(nn.Conv2d(16, 16, 3, 1, 1),
                                        nn.BatchNorm2d(16))
 
-        self.last_conv = nn.Conv2d(16, classes, 3, 1, 1),
-        self.last_up = nn.Upsample(scale_factor=2, mode='bilinear')
+        self.last_conv = nn.Conv2d(16, classes, 3, 1, 1)
 
     def forward(self, input):
 
@@ -173,6 +172,5 @@ class T_mv2_unet(nn.Module):
         s1 = self.s1_fusion(s1_)
 
         out = self.last_conv(s1)
-        out = self.last_up(out)
 
         return out
