@@ -16,7 +16,7 @@ import torch.nn.functional as F
 
 parser = argparse.ArgumentParser(description='human matting')
 parser.add_argument('--model', default='./model/model_new.pt', help='preTrained model')
-parser.add_argument('--without_gpu', action='store_true', default=False, help='finetuning the training')
+parser.add_argument('--without_gpu', action='store_true', default=False, help='no use gpu')
 
 args = parser.parse_args()
 
