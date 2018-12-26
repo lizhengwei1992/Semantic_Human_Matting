@@ -42,7 +42,7 @@ follow these steps:
 
 Use ```./data/gen_trimap.sh``` to get trimaps of the masks.
 
-Use ```./data/knn_matting.sh``` to get alpha mattes.
+Use ```./data/knn_matting.sh``` to get alpha mattes(it will take long time...).
 
 ## Step 2: build network
 
