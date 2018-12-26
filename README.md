@@ -3,7 +3,8 @@ The project is my reimplement of paper ([Semantatic Human Matting](https://arxiv
 
 One of the main contributions of the paper is that: ***A large scale high quality human matting dataset is created. It contains 35,513 unique human images with corresponding alpha mattes***. But, the dataset is not avaiable. 
 
-I collected 6k+ images as my dataset of the project. The architecture of my network, which builded with mobilenet and shallow encoder-decoder net, is a light version compaired to original implement. 
+I collected 6k+ images as my dataset of the project. Worth noting that, the architecture of my network, which builded with mobilenet and shallow encoder-decoder net, is a light version compaired to original implement. 
+
 
 # Requirements
 - python3.5 / 3.6
@@ -35,14 +36,14 @@ Semantic_Human_Matting
     └───trimap
     └───alpha
 ```
-follow these steps:
+
 ## Step 1: prepare dataset
 
 ```./data/train.txt``` contain image names according to 6k+ images(```./data/image```) and corresponding masks(```./data/mask```). 
 
 Use ```./data/gen_trimap.sh``` to get trimaps of the masks.
 
-Use ```./data/knn_matting.sh``` to get alpha mattes.
+Use ```./data/knn_matting.sh``` to get alpha mattes(it will take long time...).
 
 ## Step 2: build network
 
@@ -58,8 +59,51 @@ Use ```./data/knn_matting.sh``` to get alpha mattes.
 
 
   The M-Net aims to capture detail information and generate alpha matte. I build M-Net same as the paper, but reduce channels of the original net.
+  
+- ***Fusion Module***
 
-## Step 3: train
+  Probabilistic estimation of alpha matte can be written as <a href="https://www.codecogs.com/eqnedit.php?latex=\alpha&space;_{p}&space;=&space;F_{s}&space;&plus;&space;U_{s}\alpha&space;_{r}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\alpha&space;_{p}&space;=&space;F_{s}&space;&plus;&space;U_{s}\alpha&space;_{r}" title="\alpha _{p} = F_{s} + U_{s}\alpha _{r}" /></a>
+
+
+## Step 3: build loss 
+
+The overall prediction loss for alpha_p at each pixel is <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;L_{p}&space;=&space;\gamma\left&space;\|&space;\alpha&space;_{p}&space;-&space;\alpha&space;_{g}&space;\right&space;\|_{1}&space;&plus;&space;\left&space;(&space;1-\gamma&space;\right&space;)\left&space;\|&space;c_{p}&space;-&space;c_{g}&space;\right&space;\|_{1}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;L_{p}&space;=&space;\gamma\left&space;\|&space;\alpha&space;_{p}&space;-&space;\alpha&space;_{g}&space;\right&space;\|_{1}&space;&plus;&space;\left&space;(&space;1-\gamma&space;\right&space;)\left&space;\|&space;c_{p}&space;-&space;c_{g}&space;\right&space;\|_{1}" title="L_{p} = \gamma\left \| \alpha _{p} - \alpha _{g} \right \|_{1} + \left ( 1-\gamma \right )\left \| c_{p} - c_{g} \right \|_{1}" /></a>
+
+The total loss is <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;L&space;=&space;L_{p}&space;&plus;&space;\lambda&space;L_{t}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;L&space;=&space;L_{p}&space;&plus;&space;\lambda&space;L_{t}" title="L = L_{p} + \lambda L_{t}" /></a>
+
+Read papers for more details, and my codes for two loss functions:
+```
+    # -------------------------------------
+    # classification loss L_t
+    # ------------------------
+    # Binary Cross Entropy 
+    criterion = nn.BCELoss()
+    trimap_pre = trimap_pre.contiguous().view(-1)
+    trimap_gt = trimap_gt.view(-1)
+    L_t = criterion(trimap_pre, trimap_gt)
+
+    # -------------------------------------
+    # prediction loss L_p
+    # ------------------------
+    eps = 1e-6
+    # l_alpha
+    L_alpha = torch.sqrt(torch.pow(alpha_pre - alpha_gt, 2.) + eps).mean()
+
+    # L_composition
+    fg = torch.cat((alpha_gt, alpha_gt, alpha_gt), 1) * img
+    bg = torch.cat((1-alpha_gt, 1-alpha_gt, 1-alpha_gt), 1) * img
+    fg_pre = torch.cat((alpha_pre, alpha_pre, alpha_pre), 1) * fg
+    bg_pre = torch.cat((1-alpha_pre, 1-alpha_pre, 1-alpha_pre), 1) * bg
+
+    L_composition = torch.sqrt(torch.pow((fg_pre + bg_pre) - img, 2.) + eps).mean()
+
+    L_p = 0.5*L_alpha + 0.5*L_composition
+```
+
+
+
+
+## Step 4: train
 
 Firstly, pre_train T-Net, use ```./train.sh``` as :
 
@@ -99,8 +143,10 @@ python3 train.py \
 	--train_phase='end_to_end'
 
 ```
-# Result 
- TODO
+# Test
+  
+  run ```./test_camera.sh```
+
 
 
 
