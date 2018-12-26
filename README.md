@@ -14,7 +14,7 @@ I collected 6k+ images as my dataset of the project. The architecture of my netw
 
 Directory structure of the project:
 ```
-project
+Semantic_Human_Matting
 │   README.md
 │   train.py
 │   train.sh
@@ -46,11 +46,18 @@ Use ```./data/knn_matting.sh``` to get alpha mattes.
 
 ## Step 2: build network
 
+![SHM](https://github.com/lizhengwei1992/Semantic_Human_Matting/raw/master/network.png)
+
+
 - ***Trimap generation: T-Net***
-The T-Net plays the role of semantic segmentation. I use mobilenet_v2+unet as T-Net to predict trimap.
+
+
+  The T-Net plays the role of semantic segmentation. I use mobilenet_v2+unet as T-Net to predict trimap.
 
 - ***Matting network: M-Net***
-the M-Net aims to capture detail information and generate alpha matte. I build M-Net same as the paper, but reduce channels of the original net.
+
+
+  The M-Net aims to capture detail information and generate alpha matte. I build M-Net same as the paper, but reduce channels of the original net.
 
 ## Step 3: train
 
