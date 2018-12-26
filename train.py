@@ -129,12 +129,18 @@ class Train_Log():
 
 def loss_function(args, img, trimap_pre, trimap_gt, alpha_pre, alpha_gt):
 
-    # loss for Binary Cross Entropy 
+    # -------------------------------------
+    # classification loss L_t
+    # ------------------------
+    # Binary Cross Entropy 
     criterion = nn.BCELoss()
     trimap_pre = trimap_pre.contiguous().view(-1)
     trimap_gt = trimap_gt.view(-1)
-    cross_entropy_loss = criterion(trimap_pre, trimap_gt)
+    L_t = criterion(trimap_pre, trimap_gt)
 
+    # -------------------------------------
+    # prediction loss L_p
+    # ------------------------
     eps = 1e-6
     # l_alpha
     L_alpha = torch.sqrt(torch.pow(alpha_pre - alpha_gt, 2.) + eps).mean()
@@ -147,13 +153,15 @@ def loss_function(args, img, trimap_pre, trimap_gt, alpha_pre, alpha_gt):
 
     L_composition = torch.sqrt(torch.pow((fg_pre + bg_pre) - img, 2.) + eps).mean()
 
+    L_p = 0.5*L_alpha + 0.5*L_composition
+
     # train_phase
     if args.train_phase == 'pre_train_t_net':
-        loss = cross_entropy_loss
+        loss = L_t
     if args.train_phase == 'end_to_end':
-        loss = 0.5*L_alpha + 0.5*L_composition + 0.01*cross_entropy_loss
+        loss = L_p + 0.01*L_t
         
-    return loss, L_alpha, L_composition, cross_entropy_loss
+    return loss, L_alpha, L_composition, L_t
 
 
 
@@ -244,15 +252,11 @@ def main():
             L_composition_ = L_composition_ / (i+1)
             L_cross_ = L_cross_ / (i+1)
 
-            log = "[{} / {}] \tLr: {:.5f}\nloss: {:.5f}\
-                   loss_alpha: {:.5f}\t\
-                   loss_color: {:.5f}\t\
-                   loss_cross: {:.5f}\t" \
+            log = "[{} / {}] \tLr: {:.5f}\nloss: {:.5f}\tloss_p: {:.5f}\tloss_t: {:.5f}\t" \
                      .format(epoch, args.nEpochs, 
                             lr, 
                             loss_, 
-                            L_alpha_, 
-                            L_composition_, 
+                            L_alpha_+L_composition_, 
                             L_cross_)
             print(log)
             trainlog.save_log(log)
