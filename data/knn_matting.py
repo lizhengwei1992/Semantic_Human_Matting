@@ -1,3 +1,6 @@
+'''
+borrowed from https://github.com/MarcoForte/knn-matting
+'''
 import numpy as np
 import sklearn.neighbors
 import scipy.sparse

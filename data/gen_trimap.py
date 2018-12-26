@@ -3,8 +3,7 @@ import numpy as np
 import argparse
 
 def get_args():
-    # Training settings
-    parser = argparse.ArgumentParser(description='Segmentation to Trimap')
+    parser = argparse.ArgumentParser(description='Trimap')
     parser.add_argument('--mskDir', type=str, required=True, help="masks directory")
     parser.add_argument('--saveDir', type=str, required=True, help="where trimap result save to")
     parser.add_argument('--list', type=str, required=True, help="list of images id")
