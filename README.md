@@ -36,7 +36,7 @@ Semantic_Human_Matting
     └───trimap
     └───alpha
 ```
-follow these steps:
+
 ## Step 1: prepare dataset
 
 ```./data/train.txt``` contain image names according to 6k+ images(```./data/image```) and corresponding masks(```./data/mask```). 
