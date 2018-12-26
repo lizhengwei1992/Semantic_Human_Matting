@@ -43,7 +43,6 @@ class net(nn.Module):
 
         # matting
         alpha_r = self.m_net(m_net_input)
-
         # fusion module
         # paper : alpha_p = fs + us * alpha_r
         alpha_p = fg + unsure * alpha_r

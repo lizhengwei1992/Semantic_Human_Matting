@@ -30,7 +30,7 @@ class M_net(nn.Module):
         self.en_conv_bn_relu_2 = nn.Sequential(nn.Conv2d(16, 32, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(32),
                                        nn.ReLU())
-        self.max_pooling_2 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) 
+        self.max_pooling_2 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)  
 
         # 1/8
         self.en_conv_bn_relu_3 = nn.Sequential(nn.Conv2d(32, 64, 3, 1, 1, bias=False),
@@ -42,7 +42,7 @@ class M_net(nn.Module):
         self.en_conv_bn_relu_4 = nn.Sequential(nn.Conv2d(64, 128, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(128),
                                        nn.ReLU())
-        self.max_pooling_4 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1) 
+        self.max_pooling_4 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)  
 
         self.en_conv_bn_relu_5 = nn.Sequential(nn.Conv2d(128, 128, 3, 1, 1, bias=False),
                                        nn.BatchNorm2d(128),
@@ -99,7 +99,6 @@ class M_net(nn.Module):
         # --------
         x = self.de_conv_bn_relu_1(x)
         x = self.deconv_1(x)
-
         x = self.de_conv_bn_relu_2(x)
         x = self.deconv_2(x)
 

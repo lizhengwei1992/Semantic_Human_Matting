@@ -145,6 +145,7 @@ class T_mv2_unet(nn.Module):
                                        nn.BatchNorm2d(16))
 
         self.last_conv = nn.Conv2d(16, classes, 3, 1, 1)
+        self.last_up = nn.Upsample(scale_factor=2, mode='bilinear')
 
     def forward(self, input):
 

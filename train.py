@@ -152,7 +152,7 @@ def loss_function(args, img, trimap_pre, trimap_gt, alpha_pre, alpha_gt):
         loss = cross_entropy_loss
     if args.train_phase == 'end_to_end':
         loss = 0.5*L_alpha + 0.5*L_composition + 0.01*cross_entropy_loss
-
+        
     return loss, L_alpha, L_composition, cross_entropy_loss
 
 
@@ -245,9 +245,9 @@ def main():
             L_cross_ = L_cross_ / (i+1)
 
             log = "[{} / {}] \tLr: {:.5f}\nloss: {:.5f}\
-                   loss_alpha: {:.5f}\
-                   loss_color: {:.5f}\
-                   loss_cross: {:.5f}" \
+                   loss_alpha: {:.5f}\t\
+                   loss_color: {:.5f}\t\
+                   loss_cross: {:.5f}\t" \
                      .format(epoch, args.nEpochs, 
                             lr, 
                             loss_, 

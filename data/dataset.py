@@ -14,7 +14,7 @@ import torch.utils.data as data
 
 def read_files(data_dir, file_name={}):
 
-    image_name = os.path.join(data_dir, 'image', file_name['image'])
+    image_name = os.path.join(data_dir, 'rgb', file_name['image'])
     trimap_name = os.path.join(data_dir, 'trimap', file_name['trimap'])
     alpha_name = os.path.join(data_dir, 'alpha', file_name['alpha'])
 
@@ -32,7 +32,7 @@ def random_scale_and_creat_patch(image, trimap, alpha, patch_size):
         scale = 0.75 + 0.5*r.random()
         image = cv2.resize(image, (int(w*scale),int(h*scale)), interpolation=cv2.INTER_CUBIC)
         trimap = cv2.resize(trimap, (int(w*scale),int(h*scale)), interpolation=cv2.INTER_CUBIC)
-        alpha = cv2.resize(alpha, (int(w*scale),int(h*scale)), interpolation=cv2.INTER_CUBIC)      
+        alpha = cv2.resize(alpha, (int(w*scale),int(h*scale)), interpolation=cv2.INTER_CUBIC)    
     # creat patch
     if r.random() < 0.5:
         h, w, c = image.shape
@@ -66,13 +66,11 @@ def random_flip(image, trimap, alpha):
         trimap = cv2.flip(trimap, 1)
         alpha = cv2.flip(alpha, 1)
     return image, trimap, alpha
-
        
 def np2Tensor(array):
     ts = (2, 0, 1)
     tensor = torch.FloatTensor(array.transpose(ts).astype(float))    
     return tensor
-
 
 class human_matting_data(data.Dataset):
     """
