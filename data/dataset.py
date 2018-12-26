@@ -14,7 +14,7 @@ import torch.utils.data as data
 
 def read_files(data_dir, file_name={}):
 
-    image_name = os.path.join(data_dir, 'rgb', file_name['image'])
+    image_name = os.path.join(data_dir, 'image', file_name['image'])
     trimap_name = os.path.join(data_dir, 'trimap', file_name['trimap'])
     alpha_name = os.path.join(data_dir, 'alpha', file_name['alpha'])
 
