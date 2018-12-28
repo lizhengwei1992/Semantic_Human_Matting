@@ -132,11 +132,14 @@ def loss_function(args, img, trimap_pre, trimap_gt, alpha_pre, alpha_gt):
     # -------------------------------------
     # classification loss L_t
     # ------------------------
-    # Binary Cross Entropy 
-    criterion = nn.BCELoss()
-    trimap_pre = trimap_pre.contiguous().view(-1)
-    trimap_gt = trimap_gt.view(-1)
-    L_t = criterion(trimap_pre, trimap_gt)
+    # Cross Entropy 
+    # criterion = nn.BCELoss()
+    # trimap_pre = trimap_pre.contiguous().view(-1)
+    # trimap_gt = trimap_gt.view(-1)
+    # L_t = criterion(trimap_pre, trimap_gt)
+
+    criterion = nn.CrossEntropyLoss()
+    L_t = criterion(trimap_pre, trimap_gt[:,0,:,:].long())
 
     # -------------------------------------
     # prediction loss L_p
@@ -162,8 +165,6 @@ def loss_function(args, img, trimap_pre, trimap_gt, alpha_pre, alpha_gt):
         loss = L_p + 0.01*L_t
         
     return loss, L_alpha, L_composition, L_t
-
-
 
 
 def main():

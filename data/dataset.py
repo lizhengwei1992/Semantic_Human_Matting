@@ -31,7 +31,7 @@ def random_scale_and_creat_patch(image, trimap, alpha, patch_size):
         h, w, c = image.shape
         scale = 0.75 + 0.5*r.random()
         image = cv2.resize(image, (int(w*scale),int(h*scale)), interpolation=cv2.INTER_CUBIC)
-        trimap = cv2.resize(trimap, (int(w*scale),int(h*scale)), interpolation=cv2.INTER_CUBIC)
+        trimap = cv2.resize(trimap, (int(w*scale),int(h*scale)), interpolation=cv2.INTER_NEAREST)
         alpha = cv2.resize(alpha, (int(w*scale),int(h*scale)), interpolation=cv2.INTER_CUBIC)    
     # creat patch
     if r.random() < 0.5:
@@ -44,11 +44,11 @@ def random_scale_and_creat_patch(image, trimap, alpha, patch_size):
             alpha = alpha[y:y+patch_size, x:x+patch_size, :]
         else:
             image = cv2.resize(image, (patch_size,patch_size), interpolation=cv2.INTER_CUBIC)
-            trimap = cv2.resize(trimap, (patch_size,patch_size), interpolation=cv2.INTER_CUBIC)
+            trimap = cv2.resize(trimap, (patch_size,patch_size), interpolation=cv2.INTER_NEAREST)
             alpha = cv2.resize(alpha, (patch_size,patch_size), interpolation=cv2.INTER_CUBIC)
     else:
         image = cv2.resize(image, (patch_size,patch_size), interpolation=cv2.INTER_CUBIC)
-        trimap = cv2.resize(trimap, (patch_size,patch_size), interpolation=cv2.INTER_CUBIC)
+        trimap = cv2.resize(trimap, (patch_size,patch_size), interpolation=cv2.INTER_NEAREST)
         alpha = cv2.resize(alpha, (patch_size,patch_size), interpolation=cv2.INTER_CUBIC)
 
     return image, trimap, alpha
@@ -96,13 +96,19 @@ class human_matting_data(data.Dataset):
                                           file_name={'image': self.imgID[index].strip(),
                                                      'trimap': self.imgID[index].strip()[:-4] +'.png',
                                                      'alpha': self.imgID[index].strip()[:-4] +'.png'})
+        # NOTE ! ! !
+        # trimap should be 3 classes : fg, bg. unsure
+        trimap[trimap==0] = 0
+        trimap[trimap==128] = 1
+        trimap[trimap==255] = 2 
+
         # augmentation
         image, trimap, alpha = random_scale_and_creat_patch(image, trimap, alpha, self.patch_size)
         image, trimap, alpha = random_flip(image, trimap, alpha)
 
+
         # normalize
         image = (image.astype(np.float32)  - (114., 121., 134.,)) / 255.0
-        trimap = trimap.astype(np.float32) / 255.0
         alpha = alpha.astype(np.float32) / 255.0
         # to tensor
         image = np2Tensor(image)
