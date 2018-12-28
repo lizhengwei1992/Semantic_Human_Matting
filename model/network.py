@@ -47,7 +47,7 @@ class net(nn.Module):
         # paper : alpha_p = fs + us * alpha_r
         alpha_p = fg + unsure * alpha_r
 
-        return fg, alpha_p
+        return trimap, alpha_p
 
 
 
