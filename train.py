@@ -148,11 +148,9 @@ def loss_function(args, img, trimap_pre, trimap_gt, alpha_pre, alpha_gt):
 
     # L_composition
     fg = torch.cat((alpha_gt, alpha_gt, alpha_gt), 1) * img
-    bg = torch.cat((1-alpha_gt, 1-alpha_gt, 1-alpha_gt), 1) * img
-    fg_pre = torch.cat((alpha_pre, alpha_pre, alpha_pre), 1) * fg
-    bg_pre = torch.cat((1-alpha_pre, 1-alpha_pre, 1-alpha_pre), 1) * bg
+    fg_pre = torch.cat((alpha_pre, alpha_pre, alpha_pre), 1) * img
 
-    L_composition = torch.sqrt(torch.pow((fg_pre + bg_pre) - img, 2.) + eps).mean()
+    L_composition = torch.sqrt(torch.pow(fg - fg_pre, 2.) + eps).mean()
 
     L_p = 0.5*L_alpha + 0.5*L_composition
 
