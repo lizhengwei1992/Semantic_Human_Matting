@@ -6,7 +6,7 @@ One of the main contributions of the paper is that: ***A large scale high qualit
 
 I collected 6k+ images as my dataset of the project. Worth noting that, the architecture of my network, which builded with mobilenet and shallow encoder-decoder net, is a light version compaired to original implement. 
 
-# updata 2019/04/08 
+# update 2019/04/08 
 :thumbsup: :thumbsup: The company [***爱分割***](http://www.aisegment.com) shared their [dataset](https://github.com/aisegmentcn/matting_human_datasets) recently !
 
 
