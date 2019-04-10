@@ -8,11 +8,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model.M_Net import M_net
-from model.T_Net import T_mv2_unet
+from model.M_Net import M_net, M_tiny_net
+from model.T_Net import T_mv2_unet, RD_FPNnet
 
 
-T_net = T_mv2_unet
+T_net = RD_FPNnet
+M_net = M_tiny_net
 
 
 class net(nn.Module):
