@@ -175,3 +175,203 @@ class T_mv2_unet(nn.Module):
         out = self.last_conv(s1)
 
         return out
+
+
+# --------------------------------------------------------------------------------
+
+def conv_bn_act(inp, oup, kernel_size=3, stride=1, padding=1):
+    return nn.Sequential(
+        nn.Conv2d(inp, oup, kernel_size, stride, padding, bias=False),
+        nn.BatchNorm2d(oup),
+        nn.PReLU(oup)
+    )
+def bn_act(inp):
+    return nn.Sequential(
+        nn.BatchNorm2d(inp),
+        nn.PReLU(inp)
+    )
+class make_dense(nn.Module):
+    def __init__(self, nChannels, growthRate):
+        super(make_dense, self).__init__()
+        
+        self.conv = nn.Conv2d(nChannels, growthRate, kernel_size=3, padding=1, dilation=1, bias=False)
+        self.bn = nn.BatchNorm2d(growthRate)
+        self.act = nn.ReLU(inplace=True)
+    def forward(self, x):
+        x_ = self.bn(self.conv(x))
+        out = self.act(x_)
+        out = torch.cat((x, out), 1)
+        return out
+
+class DenseBlock(nn.Module):
+    def __init__(self, nChannels, nDenselayer, growthRate, reset_channel=False):
+        super(DenseBlock, self).__init__()
+        nChannels_ = nChannels
+        modules = []
+        for i in range(nDenselayer):    
+            modules.append(make_dense(nChannels_, growthRate))
+            nChannels_ += growthRate 
+        self.dense_layers = nn.Sequential(*modules)
+
+    def forward(self, x):
+        out = self.dense_layers(x)
+        return out
+
+# ResidualDenseBlock
+class ResidualDenseBlock(nn.Module):
+    def __init__(self, nIn, s=4, add=True):
+
+        super(ResidualDenseBlock, self).__init__()
+
+        n = int(nIn//s) 
+
+        self.conv =  nn.Conv2d(nIn, n, 1, stride=1, padding=0, bias=False)
+        self.dense_block = DenseBlock(n, nDenselayer=(s-1), growthRate=n)
+
+        self.bn = nn.BatchNorm2d(nIn)
+        self.act = nn.PReLU(nIn)
+
+        self.add = add
+
+    def forward(self, input):
+
+        # reduce
+        inter = self.conv(input)
+        combine =self.dense_block(inter)
+
+        # if residual version
+        if self.add:
+            combine = input + combine
+
+        output = self.act(self.bn(combine))
+        return output
+
+class RD_FPNnet(nn.Module):
+
+    def __init__(self, classes=3):
+
+        super(RD_FPNnet, self).__init__()
+
+        # -----------------------------------------------------------------
+        # encoder 
+        # ---------------------
+        # input cascade
+        self.cascade = nn.AvgPool2d(3, stride=2, padding=1)
+        # 1/2
+        self.head_conv = conv_bn_act(3, 24, kernel_size=3, stride=2, padding=1)
+        self.stage_0 = ResidualDenseBlock(24, s=3, add=True)
+
+        # 1/4
+        self.ba_1 = bn_act(24+3)
+        self.down_1 = conv_bn_act(24+3, 24, kernel_size=3, stride=2, padding=1)
+        self.stage_1 = nn.Sequential(ResidualDenseBlock(24, s=3, add=True),
+                                     ResidualDenseBlock(24, s=3, add=True))
+                                     # ResidualDenseBlock(24, s=2, add=True))
+        # 1/8
+        self.ba_2 = bn_act(48+3)
+        self.down_2 = conv_bn_act(48+3, 48, kernel_size=3, stride=2, padding=1)
+        self.stage_2 = nn.Sequential(ResidualDenseBlock(48, s=4, add=True),
+                                     ResidualDenseBlock(48, s=4, add=True))
+                                     # ResidualDenseBlock(48, s=3, add=True),
+                                     # ResidualDenseBlock(48, s=3, add=True))s
+        # 1/16
+        self.ba_3 = bn_act(96+3)
+        self.down_3 = conv_bn_act(96+3, 96, kernel_size=3, stride=2, padding=1)
+        self.stage_3 = nn.Sequential(ResidualDenseBlock(96, s=4, add=True),
+                                     ResidualDenseBlock(96, s=4, add=True))
+                                     # ResidualDenseBlock(96, s=3, add=True),
+                                     # ResidualDenseBlock(96, s=3, add=True))
+        # 1/32
+        self.ba_4 = bn_act(192+3)
+        self.down_4 = conv_bn_act(192+3, 192, kernel_size=3, stride=2, padding=1)
+        self.stage_4 = nn.Sequential(ResidualDenseBlock(192, s=6, add=True),
+                                     ResidualDenseBlock(192, s=6, add=True))
+                                     # ResidualDenseBlock(192, s=3, add=True),
+                                     # ResidualDenseBlock(192, s=3, add=True)) 
+
+        # -----------------------------------------------------------------
+        # heatmap 
+        # ---------------------
+        self.classifier = nn.Conv2d(192, classes, 1, stride=1, padding=0, bias=True)
+
+        # -----------------------------------------------------------------
+        # decoder 
+        # ---------------------
+
+        self.up = nn.Upsample(scale_factor=2, mode='bilinear')
+
+        self.stage3_down = nn.Conv2d(96, classes, kernel_size=1, stride=1, padding=0)
+        self.conv_3 = nn.Conv2d(classes, classes, 3, 1, 1, bias=True)                           
+                                
+        self.stage2_down = nn.Conv2d(48, classes, kernel_size=1, stride=1, padding=0)
+        self.conv_2 = nn.Conv2d(classes, classes, 3, 1, 1, bias=True)
+ 
+        self.stage1_down = nn.Conv2d(24, classes, kernel_size=1, stride=1, padding=0)
+        self.conv_1 = nn.Conv2d(classes, classes, 3, 1, 1, bias=True)
+
+
+        self.stage0_down = nn.Conv2d(24, classes, kernel_size=1, stride=1, padding=0)
+        self.conv_0 = nn.Conv2d(classes, classes, 3, 1, 1, bias=True)
+            
+        self.last_up = nn.Upsample(scale_factor=2, mode='bilinear')
+
+
+        # init weights
+        self._init_weight()
+
+    def _init_weight(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+                nn.init.xavier_normal_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+
+    def forward(self, input):
+
+        input_cascade1 = self.cascade(input)
+        input_cascade2 = self.cascade(input_cascade1)
+        input_cascade3 = self.cascade(input_cascade2)
+        input_cascade4 = self.cascade(input_cascade3)
+        x = self.head_conv(input)
+        # 1/2
+        s0 = self.stage_0(x)
+
+        # ---------------
+        s1_0 = self.down_1(self.ba_1(torch.cat((input_cascade1, s0),1)))
+        s1 = self.stage_1(s1_0)
+
+        # ---------------
+        s2_0 = self.down_2(self.ba_2(torch.cat((input_cascade2, s1_0, s1),1)))
+        s2 = self.stage_2(s2_0)
+
+        # ---------------
+        s3_0 = self.down_3(self.ba_3(torch.cat((input_cascade3, s2_0, s2),1)))
+        s3 = self.stage_3(s3_0)
+
+        # ---------------
+        s4_0 = self.down_4(self.ba_4(torch.cat((input_cascade4, s3_0, s3),1)))
+        s4 = self.stage_4(s4_0)
+
+
+        # -------------------------------------------------------
+
+        heatmap = self.classifier(s4)
+        # -------------------------------------------------------
+
+
+        p3 = self.up(heatmap) + self.stage3_down(s3)
+        p3 = self.conv_3(p3)
+        p2 = self.up(p3) + self.stage2_down(s2)
+        p2 = self.conv_2(p2)
+        p1 = self.up(p2) + self.stage1_down(s1)
+        p1 = self.conv_1(p1)
+        p0 = self.up(p1) + self.stage0_down(s0)
+        p0 = self.conv_0(p0)
+       
+        out = self.last_up(p0)  
+
+
+        return out
